@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HR-App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+</head>
+<body>
+
+<div data-role="page">
+
+    <div data-role="header">
+        <!--<h1>HR GURU</h1>-->
+       <h1><img src="images/hrguru.jpg" height="50" width="250"/></h1>
+    </div><!-- /header -->
+
+    <div data-role="content">
+        <form action="http://munchzone.ichanical.com" method="get">
+
+            <p style="text-align: center">Search HR words </p>
+
+            <input type="search" name="keyword" id="search-keyword" value="" />
+<meta charset="UTF-8">
+            <p></p>
+
+            <input type="submit" value="Submit" id="submit"/>
+        </form>
+
+    </div><!-- /content -->
+
+</div><!-- /page -->
+
+
+
+<div data-role="dialog" id="two" data-theme="a">
+
+    <div data-role="header">
+        <h1>HR GURU</h1>
+    </div><!-- /header -->
+
+    <div id="dialog_content"  data-role="content" data-theme="a">
+        <h2 id="term">Two</h2>
+        <p id="definition">I have an id of "two" on my page container. I'm the second page container in this multi-page template.</p>
+
+    </div><!-- /content -->
+
+</div><!-- /page two -->
+
+</body>
+</html>
+<script >
+    var result;
+
+    $(function(){
+        $("#submit").click(function(e){
+            $.mobile.loading( 'show', {
+                theme: 'z'
+            });
+            e.preventDefault();
+            var key_word=$("#search-keyword").val();
+            jQuery.getJSON("http://hrapp.ichanical.com/search.json?callback=?&keyword="+key_word,function(json){
+                result=json;
+                proessJson();
+            });
+        });
+    });
+    function proessJson() {
+        var content;
+        $.mobile.loading( 'hide' );
+
+        if(result.length>1)
+        {
+            $("#term").text("Did you mean ? ");
+            $("#definition").text("");
+            $("#dialog_content").append("<ul></ul>")
+            $.each(result,function(key,value){
+                $("#dialog_content ul").append("<li class='did_you_mean_link' data-term=\""+value.term+"\"><a href='#' >"+value.term+"</a></li>");
+            });
+            listenDidYouMeanLink();
+        }
+        else if(result.length<1){
+            $("#term").text("No matches Found");
+            $("#definition").text("");
+            $("#dialog_content ul").remove();
+
+        }
+        else{
+            //alert(result[0].term+" : "+result[0].definition);
+            $("#term").text(result[0].term);
+            $("#definition").text(result[0].definition);
+            $("#dialog_content ul").remove();
+
+        }
+        $.mobile.changePage('#two','pop',false,false);
+
+    }
+
+    function listenDidYouMeanLink(){
+        $(".did_you_mean_link").unbind("click");
+        $(".did_you_mean_link").click(function(){
+          //  alert($(this).data("term"));
+            $("#search-keyword").val($(this).data("term"));
+            $("#submit").click();
+
+        });
+    }
+
+</script>
